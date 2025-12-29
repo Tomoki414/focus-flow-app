@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { Task, DayOfWeek, DAYS_OF_WEEK } from '../types';
-import { Plus, Trash2, Edit2, X, Save } from 'lucide-react';
+import { Plus, Trash2, Edit2, X, Save, CheckCircle2, Circle } from 'lucide-react';
 
 interface ScheduleEditorProps {
   tasks: Task[];
   onAddTask: (task: Task) => void;
   onUpdateTask: (task: Task) => void;
   onDeleteTask: (id: string) => void;
+  onToggleTask: (id: string) => void;
 }
 
-export default function ScheduleEditor({ tasks, onAddTask, onUpdateTask, onDeleteTask }: ScheduleEditorProps) {
+export default function ScheduleEditor({ tasks, onAddTask, onUpdateTask, onDeleteTask, onToggleTask }: ScheduleEditorProps) {
   const [activeDay, setActiveDay] = useState<DayOfWeek>('Monday');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -68,7 +69,8 @@ export default function ScheduleEditor({ tasks, onAddTask, onUpdateTask, onDelet
         name: formData.name,
         startTime: formData.startTime,
         endTime: formData.endTime,
-        note: formData.note || ''
+        note: formData.note || '',
+        completed: false
       });
     }
     setIsModalOpen(false);
@@ -121,17 +123,25 @@ export default function ScheduleEditor({ tasks, onAddTask, onUpdateTask, onDelet
             activeTasks.map(task => (
               <div 
                 key={task.id} 
-                className="group bg-white rounded-xl p-4 border border-slate-100 shadow-sm hover:shadow-md transition-all flex justify-between items-start"
+                className={`group bg-white rounded-xl p-4 border shadow-sm hover:shadow-md transition-all flex justify-between items-start ${task.completed ? 'border-emerald-100 bg-emerald-50/30' : 'border-slate-100'}`}
               >
-                <div className="flex-1">
+                <button 
+                  onClick={() => onToggleTask(task.id)}
+                  className={`mt-1 mr-3 flex-shrink-0 transition-colors ${task.completed ? 'text-emerald-500' : 'text-slate-300 hover:text-indigo-400'}`}
+                >
+                  {task.completed ? <CheckCircle2 size={22} /> : <Circle size={22} />}
+                </button>
+
+                <div className={`flex-1 transition-opacity ${task.completed ? 'opacity-50' : 'opacity-100'}`}>
                   <div className="flex items-center space-x-2 text-sm text-slate-500 font-mono mb-1">
                     <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-700 font-bold">{task.startTime}</span>
                     <span>-</span>
                     <span>{task.endTime}</span>
                   </div>
-                  <h4 className="text-lg font-semibold text-slate-800">{task.name}</h4>
+                  <h4 className={`text-lg font-semibold text-slate-800 ${task.completed ? 'line-through decoration-slate-400' : ''}`}>{task.name}</h4>
                   {task.note && <p className="text-slate-500 text-sm mt-1 line-clamp-2">{task.note}</p>}
                 </div>
+                
                 <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
                   <button 
                     onClick={() => handleOpenModal(task)}

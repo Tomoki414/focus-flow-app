@@ -17,6 +17,7 @@ export interface Task {
   endTime: string;   // Format "HH:mm"
   name: string;
   note?: string;
+  completed: boolean;
 }
 
 export type AppView = 'dashboard' | 'editor';

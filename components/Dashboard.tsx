@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Task, DayOfWeek, DAYS_OF_WEEK } from '../types';
-import { Clock, CheckCircle2, Coffee, ArrowRight } from 'lucide-react';
+import { Clock, CheckCircle2, Coffee, ArrowRight, Circle } from 'lucide-react';
 
 interface DashboardProps {
   tasks: Task[];
+  onToggleTask: (id: string) => void;
 }
 
-export default function Dashboard({ tasks }: DashboardProps) {
+export default function Dashboard({ tasks, onToggleTask }: DashboardProps) {
   const [now, setNow] = useState(new Date());
 
   // Update time every second
@@ -15,10 +16,6 @@ export default function Dashboard({ tasks }: DashboardProps) {
     return () => clearInterval(timer);
   }, []);
 
-  const currentDayName = DAYS_OF_WEEK[now.getDay() === 0 ? 6 : now.getDay() - 1]; // JS getDay: 0=Sun, Adjust to Mon=0 index if needed, but our array is Mon-Sun.
-  // Actually, standard Date.getDay() returns 0 for Sunday, 1 for Monday.
-  // Our DAYS_OF_WEEK is ['Monday', 'Tuesday', ..., 'Sunday'].
-  // So: 1->Monday(0), 2->Tuesday(1)... 6->Saturday(5), 0->Sunday(6).
   const dayIndex = now.getDay() === 0 ? 6 : now.getDay() - 1;
   const todayName = DAYS_OF_WEEK[dayIndex];
 
@@ -44,7 +41,6 @@ export default function Dashboard({ tasks }: DashboardProps) {
       }
     }
     
-    // If no next task found today, maybe show "No more tasks today"
     return { currentTask: current, nextTask: next };
   }, [todaysTasks, currentTimeStr]);
 
@@ -85,13 +81,13 @@ export default function Dashboard({ tasks }: DashboardProps) {
 
       {/* Current Task Section */}
       <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl transform rotate-1 opacity-10"></div>
-        <div className={`relative bg-white border border-slate-100 rounded-2xl shadow-xl overflow-hidden transition-all duration-500 ${!currentTask ? 'border-dashed border-2 border-slate-300 shadow-none bg-slate-50' : ''}`}>
+        <div className={`absolute inset-0 rounded-2xl transform rotate-1 opacity-10 ${currentTask?.completed ? 'bg-gradient-to-r from-emerald-500 to-green-600' : 'bg-gradient-to-r from-indigo-500 to-purple-600'}`}></div>
+        <div className={`relative bg-white border border-slate-100 rounded-2xl shadow-xl overflow-hidden transition-all duration-500 ${!currentTask ? 'border-dashed border-2 border-slate-300 shadow-none bg-slate-50' : ''} ${currentTask?.completed ? 'ring-2 ring-emerald-100' : ''}`}>
           
           <div className="p-8">
             <div className="flex items-center justify-between mb-6">
-              <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${currentTask ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-200 text-slate-500'}`}>
-                Now
+              <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${currentTask ? (currentTask.completed ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-700') : 'bg-slate-200 text-slate-500'}`}>
+                {currentTask ? (currentTask.completed ? 'Completed' : 'Now') : 'Now'}
               </span>
               {currentTask && (
                 <div className="flex items-center text-slate-500 text-sm font-medium">
@@ -102,15 +98,39 @@ export default function Dashboard({ tasks }: DashboardProps) {
             </div>
 
             {currentTask ? (
-              <div className="space-y-4">
-                <h3 className="text-3xl md:text-4xl font-bold text-slate-800 leading-tight">
-                  {currentTask.name}
-                </h3>
-                {currentTask.note && (
-                  <p className="text-slate-600 bg-slate-50 p-4 rounded-xl text-lg border-l-4 border-indigo-400">
-                    {currentTask.note}
-                  </p>
-                )}
+              <div className="space-y-6">
+                <div>
+                  <h3 className={`text-3xl md:text-4xl font-bold leading-tight transition-all ${currentTask.completed ? 'text-slate-400 line-through decoration-emerald-400 decoration-4' : 'text-slate-800'}`}>
+                    {currentTask.name}
+                  </h3>
+                  {currentTask.note && (
+                    <p className="text-slate-600 bg-slate-50 p-4 rounded-xl text-lg border-l-4 border-indigo-400 mt-4">
+                      {currentTask.note}
+                    </p>
+                  )}
+                </div>
+
+                {/* Completion Toggle Button */}
+                <button 
+                  onClick={() => onToggleTask(currentTask.id)}
+                  className={`w-full py-4 rounded-xl flex items-center justify-center space-x-2 font-bold text-lg transition-all transform active:scale-95 ${
+                    currentTask.completed 
+                      ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100' 
+                      : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-200'
+                  }`}
+                >
+                  {currentTask.completed ? (
+                    <>
+                      <CheckCircle2 size={24} />
+                      <span>Task Completed</span>
+                    </>
+                  ) : (
+                    <>
+                      <Circle size={24} />
+                      <span>Mark as Complete</span>
+                    </>
+                  )}
+                </button>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-8 text-slate-400">
@@ -122,13 +142,16 @@ export default function Dashboard({ tasks }: DashboardProps) {
           </div>
 
           {/* Progress Bar */}
-          {currentTask && (
+          {currentTask && !currentTask.completed && (
              <div className="h-2 bg-slate-100 w-full">
                 <div 
                   className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 transition-all duration-1000 ease-linear"
                   style={{ width: `${progressPercent}%` }}
                 />
              </div>
+          )}
+          {currentTask && currentTask.completed && (
+             <div className="h-2 bg-emerald-500 w-full" />
           )}
         </div>
       </div>
@@ -142,17 +165,23 @@ export default function Dashboard({ tasks }: DashboardProps) {
         
         {nextTask ? (
           <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between group hover:border-indigo-300 transition-colors">
-            <div>
+            <div className={nextTask.completed ? 'opacity-50' : ''}>
               <p className="text-slate-500 text-sm font-medium mb-1">
                 Starts at {nextTask.startTime}
               </p>
-              <h4 className="text-xl font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">
+              <h4 className={`text-xl font-bold text-slate-800 group-hover:text-indigo-600 transition-colors ${nextTask.completed ? 'line-through decoration-slate-400' : ''}`}>
                 {nextTask.name}
               </h4>
             </div>
-            <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-all">
-              <Clock size={20} />
-            </div>
+            {nextTask.completed ? (
+              <div className="h-10 w-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                <CheckCircle2 size={20} />
+              </div>
+            ) : (
+              <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-all">
+                <Clock size={20} />
+              </div>
+            )}
           </div>
         ) : (
           <div className="bg-slate-50 p-5 rounded-xl border border-dashed border-slate-300 text-center text-slate-400 text-sm">
