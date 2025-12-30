@@ -20,7 +20,8 @@ export default function ScheduleEditor({ tasks, onAddTask, onUpdateTask, onDelet
     startTime: '09:00',
     endTime: '10:00',
     name: '',
-    note: ''
+    note: '',
+    color: 'indigo',
   });
 
   const activeTasks = tasks
@@ -34,7 +35,8 @@ export default function ScheduleEditor({ tasks, onAddTask, onUpdateTask, onDelet
         startTime: task.startTime,
         endTime: task.endTime,
         name: task.name,
-        note: task.note
+        note: task.note,
+        color: task.color ?? 'indigo',
       });
     } else {
       setEditingTask(null);
@@ -42,7 +44,8 @@ export default function ScheduleEditor({ tasks, onAddTask, onUpdateTask, onDelet
         startTime: '09:00',
         endTime: '10:00',
         name: '',
-        note: ''
+        note: '',
+        color: 'indigo',
       });
     }
     setIsModalOpen(true);
@@ -60,7 +63,8 @@ export default function ScheduleEditor({ tasks, onAddTask, onUpdateTask, onDelet
         startTime: formData.startTime,
         endTime: formData.endTime,
         note: formData.note || '',
-        day: activeDay
+        day: activeDay,
+        color: formData.color || editingTask.color || 'indigo',
       });
     } else {
       onAddTask({
@@ -70,7 +74,8 @@ export default function ScheduleEditor({ tasks, onAddTask, onUpdateTask, onDelet
         startTime: formData.startTime,
         endTime: formData.endTime,
         note: formData.note || '',
-        completed: false
+        completed: false,
+        color: formData.color || 'indigo',
       });
     }
     setIsModalOpen(false);
@@ -212,6 +217,41 @@ export default function ScheduleEditor({ tasks, onAddTask, onUpdateTask, onDelet
                   onChange={e => setFormData({...formData, name: e.target.value})}
                   className="w-full border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 />
+              </div>
+
+              {/* Color */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-slate-500 uppercase">
+                  Color
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { key: 'indigo', label: 'Default', className: 'bg-indigo-500' },
+                    { key: 'emerald', label: 'Deep Work', className: 'bg-emerald-500' },
+                    { key: 'amber', label: 'Break', className: 'bg-amber-400' },
+                    { key: 'rose', label: 'Meeting', className: 'bg-rose-500' },
+                    { key: 'sky', label: 'School', className: 'bg-sky-500' },
+                  ].map((c) => {
+                    const active = formData.color === c.key;
+                    return (
+                      <button
+                        key={c.key}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, color: c.key })}
+                        className={`flex items-center gap-2 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                          active
+                            ? 'border-slate-900/80 bg-slate-900/90 text-white shadow-sm'
+                            : 'border-slate-200 text-slate-600 hover:border-slate-400 bg-white'
+                        }`}
+                      >
+                        <span
+                          className={`h-3 w-3 rounded-full ${c.className} border border-white shadow`}
+                        />
+                        <span>{c.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               <div className="space-y-1">

@@ -18,6 +18,11 @@ export interface Task {
   name: string;
   note?: string;
   completed: boolean;
+  /**
+   * Tailwindのクラス名またはカラーキー
+   * 例: "indigo", "emerald", "rose" など
+   */
+  color?: string;
 }
 
-export type AppView = 'dashboard' | 'editor';
+export type AppView = 'dashboard' | 'editor' | 'calendar';

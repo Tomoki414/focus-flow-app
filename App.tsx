@@ -2,16 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Task, AppView } from './types';
 import Dashboard from './components/Dashboard';
 import ScheduleEditor from './components/ScheduleEditor';
-import { Calendar, LayoutDashboard } from 'lucide-react';
+import WeekCalendar from './components/WeekCalendar';
+import { Calendar, CalendarRange, LayoutDashboard } from 'lucide-react';
 
 const STORAGE_KEY = 'focusflow_tasks_v1';
 const RESET_KEY = 'focusflow_last_reset_date';
 
+// デフォルトカラー（指定がなければこれを使う）
+const DEFAULT_TASK_COLOR = 'indigo';
+
 // Initial demo data
 const INITIAL_TASKS: Task[] = [
-  { id: '1', day: 'Monday', startTime: '09:00', endTime: '10:00', name: 'Check Emails', note: 'Reply to urgent matters', completed: false },
-  { id: '2', day: 'Monday', startTime: '10:00', endTime: '12:00', name: 'Deep Work', note: 'Coding session', completed: false },
-  { id: '3', day: 'Monday', startTime: '12:00', endTime: '13:00', name: 'Lunch Break', note: 'Relax', completed: false },
+  { id: '1', day: 'Monday', startTime: '09:00', endTime: '10:00', name: 'Check Emails', note: 'Reply to urgent matters', completed: false, color: DEFAULT_TASK_COLOR },
+  { id: '2', day: 'Monday', startTime: '10:00', endTime: '12:00', name: 'Deep Work', note: 'Coding session', completed: false, color: 'emerald' },
+  { id: '3', day: 'Monday', startTime: '12:00', endTime: '13:00', name: 'Lunch Break', note: 'Relax', completed: false, color: 'amber' },
 ];
 
 // Helper to get the date string (YYYY-MM-DD) of the Monday of the current week
@@ -34,9 +38,13 @@ export default function App() {
     const currentMonday = getCurrentMondayDateString();
 
     let parsedTasks: Task[] = savedTasks ? JSON.parse(savedTasks) : INITIAL_TASKS;
-    
-    // Ensure all loaded tasks have the 'completed' property (migration for old data)
-    parsedTasks = parsedTasks.map(t => ({ ...t, completed: t.completed ?? false }));
+
+    // 既存データとの互換性確保（completed / color を補完）
+    parsedTasks = parsedTasks.map(t => ({
+      ...t,
+      completed: t.completed ?? false,
+      color: t.color ?? DEFAULT_TASK_COLOR,
+    }));
 
     // Weekly Reset Logic
     if (lastResetDate !== currentMonday) {
@@ -103,23 +111,40 @@ export default function App() {
             <Calendar size={18} />
             <span>Schedule</span>
           </button>
+          <button
+            onClick={() => setView('calendar')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              view === 'calendar' 
+                ? 'bg-indigo-500 text-white shadow-md' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-700'
+            }`}
+          >
+            <CalendarRange size={18} />
+            <span>Calendar</span>
+          </button>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto bg-slate-50 relative">
-        {view === 'dashboard' ? (
+        {view === 'dashboard' && (
           <Dashboard 
             tasks={tasks} 
             onToggleTask={toggleTaskCompletion}
           />
-        ) : (
+        )}
+        {view === 'editor' && (
           <ScheduleEditor 
             tasks={tasks} 
             onAddTask={addTask} 
             onUpdateTask={updateTask} 
             onDeleteTask={deleteTask}
             onToggleTask={toggleTaskCompletion}
+          />
+        )}
+        {view === 'calendar' && (
+          <WeekCalendar
+            tasks={tasks}
           />
         )}
       </main>
