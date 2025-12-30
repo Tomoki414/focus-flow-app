@@ -88,39 +88,39 @@ export default function App() {
         <h1 className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
           FocusFlow
         </h1>
-        <div className="flex space-x-2 bg-slate-800 p-1 rounded-lg">
+        <div className="flex space-x-1 bg-slate-800 p-1 rounded-lg">
           <button
             onClick={() => setView('dashboard')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            className={`flex items-center justify-center md:space-x-2 px-2.5 md:px-4 py-2 rounded-md text-xs md:text-sm font-medium transition-all ${
               view === 'dashboard' 
                 ? 'bg-indigo-500 text-white shadow-md' 
                 : 'text-slate-400 hover:text-white hover:bg-slate-700'
             }`}
           >
             <LayoutDashboard size={18} />
-            <span>Dashboard</span>
+            <span className="hidden md:inline">Dashboard</span>
           </button>
           <button
             onClick={() => setView('editor')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            className={`flex items-center justify-center md:space-x-2 px-2.5 md:px-4 py-2 rounded-md text-xs md:text-sm font-medium transition-all ${
               view === 'editor' 
                 ? 'bg-indigo-500 text-white shadow-md' 
                 : 'text-slate-400 hover:text-white hover:bg-slate-700'
             }`}
           >
             <Calendar size={18} />
-            <span>Schedule</span>
+            <span className="hidden md:inline">Schedule</span>
           </button>
           <button
             onClick={() => setView('calendar')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            className={`flex items-center justify-center md:space-x-2 px-2.5 md:px-4 py-2 rounded-md text-xs md:text-sm font-medium transition-all ${
               view === 'calendar' 
                 ? 'bg-indigo-500 text-white shadow-md' 
                 : 'text-slate-400 hover:text-white hover:bg-slate-700'
             }`}
           >
             <CalendarRange size={18} />
-            <span>Calendar</span>
+            <span className="hidden md:inline">Calendar</span>
           </button>
         </div>
       </header>
